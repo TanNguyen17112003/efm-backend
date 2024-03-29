@@ -31,7 +31,7 @@ import {
       // .populate('createdBy')
       // .exec();
       if (!goal) {
-        throw new NotFoundException('Sample not found');
+        throw new NotFoundException('Goal not found');
       }
       //Authorization
       if (goal.createdBy.toString() !== user._id.toString()) {
@@ -65,6 +65,7 @@ import {
         );
       }
       goal.content = body.content;
+      goal.dueDate = body.dueDate;
       const updatedGoal = await goal.save();
       return updatedGoal;
     }

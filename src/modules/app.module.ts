@@ -16,6 +16,9 @@ import { GoogleController } from 'src/controllers/google.controller';
 import { Goal, GoalSchema } from 'src/models/goal.model';
 import { GoalController } from 'src/controllers/goal.controller';
 import { GoalService } from 'src/services/goal.service';
+import { Activity, ActivitySchema } from 'src/models/activity.model';
+import { ActivityService } from 'src/services/activity.service';
+import { ActivityController } from 'src/controllers/activity.controller';
 
 @Module({
   imports: [
@@ -31,13 +34,15 @@ import { GoalService } from 'src/services/goal.service';
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     MongooseModule.forFeature([{ name: Sample.name, schema: SampleSchema }]),
     MongooseModule.forFeature([{ name: Goal.name, schema: GoalSchema }]),
+    MongooseModule.forFeature([{ name: Activity.name, schema: ActivitySchema }]),
   ],
   controllers: [
     AppController,
     UserController,
     SampleController,
     GoogleController,
-    GoalController
+    GoalController,
+    ActivityController
   ],
   providers: [
     AppService,
@@ -45,6 +50,7 @@ import { GoalService } from 'src/services/goal.service';
     SampleService,
     GoogleService,
     GoalService,
+    ActivityService,
     GoogleStrategy,
   ],
   exports: [ConfigModule],
