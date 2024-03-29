@@ -2,16 +2,18 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
 import { User } from './user.model';
 import { ApiProperty } from '@nestjs/swagger';
-export type GoalDocument = Goal & Document;
+export type ActivityDocument = Activity & Document;
 @Schema()
-export class Goal {
+export class Activity {
+  @Prop({ required: true })
+  category: string;
   @Prop({ required: true })
   content: string;
-  @Prop({ default: Date.now() })
-  createdAt: Date;
   @Prop({ required: true })
-  dueDate: Date;
+  createdAt: Date;
+  @Prop({required: true})
+  amount: number;
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
   createdBy: User;
 }
-export const GoalSchema = SchemaFactory.createForClass(Goal);
+export const ActivitySchema = SchemaFactory.createForClass(Activity);

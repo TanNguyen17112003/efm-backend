@@ -1,5 +1,5 @@
 
-  import {
+import {
     Body,
     Controller,
     HttpStatus,
@@ -19,52 +19,52 @@
     ApiTags,
     ApiParam,
   } from '@nestjs/swagger';
-  import { GoalService } from '../services/goal.service';
+  import { ActivityService } from '../services/activity.service';
   import { AuthGuard } from 'src/guards/auth.guard';
-  import { CreateGoalDto } from 'src/dto/goal.dto';
+  import { CreateActivityDto } from 'src/dto/activity.dto';
   @ApiBearerAuth('JWT-auth')
-  @ApiTags('Goal')
-  @Controller('/api/goal')
-  export class GoalController {
-    constructor(private readonly goalService: GoalService) {}
+  @ApiTags('Activity')
+  @Controller('/api/activity')
+  export class ActivityController {
+    constructor(private readonly activityService: ActivityService) {}
     @UseGuards(AuthGuard)
     @Post()
-    @ApiOperation({ summary: 'Create goal' })
+    @ApiOperation({ summary: 'Create activity' })
     @ApiResponse({ status: 201, description: 'OK.' })
-    async createnewGoal(
+    async createActivity(
       @Response() response,
       @Request() request,
-      @Body() body: CreateGoalDto,
+      @Body() body: CreateActivityDto,
     ) {
-      const goal = await this.goalService.create(request.user, body);
+      const activity = await this.activityService.create(request.user, body);
       return response.status(HttpStatus.CREATED).json({
-        goal,
+        activity,
       });
     }
   
     @UseGuards(AuthGuard)
     @Get('/:id')
-    @ApiOperation({ summary: 'Get goal of each user by id' })
+    @ApiOperation({ summary: 'Get activity of each user by id' })
     @ApiParam({
       name: 'id',
       required: true,
-      description: 'id of goal',
+      description: 'id of activity',
       schema: { oneOf: [{ type: 'string' }, { type: 'integer' }] },
     })
     @ApiResponse({ status: 200, description: 'OK.' })
-    async getGoalById(@Response() response, @Request() request, @Param() params) {
-      const goal = await this.goalService.getById(request.user, params);
+    async getActivityById(@Response() response, @Request() request, @Param() params) {
+      const activity = await this.activityService.getById(request.user, params);
       return response.status(HttpStatus.OK).json({
-        goal,
+        activity,
       });
     }
   
     @UseGuards(AuthGuard)
     @Get()
-    @ApiOperation({ summary: 'Get all goals of a user' })
+    @ApiOperation({ summary: 'Get all activitys of a user' })
     @ApiResponse({ status: 200, description: 'OK.' })
-    async getAllGoals(@Response() response, @Request() request) {
-      const sample = await this.goalService.getAll(request.user);
+    async getAllActivities(@Response() response, @Request() request) {
+      const sample = await this.activityService.getAll(request.user);
       return response.status(HttpStatus.OK).json({
         sample,
       });
@@ -75,24 +75,24 @@
     @ApiParam({
       name: 'id',
       required: true,
-      description: 'id of goal',
+      description: 'id of activity',
       schema: { oneOf: [{ type: 'string' }, { type: 'integer' }] },
     })
-    @ApiOperation({ summary: 'Update a goal' })
+    @ApiOperation({ summary: 'Update a activity' })
     @ApiResponse({ status: 200, description: 'OK.' })
-    async updateGoal(
+    async updateActivity(
       @Response() response,
       @Request() request,
       @Param() params,
-      @Body() Body: CreateGoalDto,
+      @Body() Body: CreateActivityDto,
     ) {
-      const goal = await this.goalService.update(
+      const activity = await this.activityService.update(
         request.user,
         params,
         Body,
       );
       return response.status(HttpStatus.OK).json({
-        goal,
+        activity,
       });
     }
   
@@ -101,19 +101,19 @@
     @ApiParam({
       name: 'id',
       required: true,
-      description: 'id of goal to delete',
+      description: 'id of activity to delete',
       schema: { oneOf: [{ type: 'string' }, { type: 'integer' }] },
     })
-    @ApiOperation({ summary: 'Delete a goal' })
+    @ApiOperation({ summary: 'Delete a activity' })
     @ApiResponse({ status: 200, description: 'OK.' })
-    async deleteGoal(
+    async deleteActivity(
       @Response() response,
       @Request() request,
       @Param() params,
     ) {
-      await this.goalService.delete(request.user, params);
+      await this.activityService.delete(request.user, params);
       return response.status(HttpStatus.OK).json({
-        message: 'Goal deleted successfully',
+        message: 'Activity deleted successfully',
       });
     }
   }
