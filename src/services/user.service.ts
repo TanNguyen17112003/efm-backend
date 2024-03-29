@@ -52,10 +52,13 @@ export class UserService {
       .exec();
     if (foundUser) {
       const { password } = foundUser;
-      if (bcrypt.compare(user.password, password)) {
+      const comparison = await bcrypt.compare(user.password, password);
+      if (comparison) {
         const payload = { email: user.email };
+        const {name} = foundUser
         return {
           token: jwt.sign(payload),
+          name: name
         };
       }
       return new HttpException(
