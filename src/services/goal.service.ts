@@ -64,8 +64,11 @@ import {
           'User is not authorized to update this goal',
         );
       }
-      goal.content = body.content;
-      goal.dueDate = body.dueDate;
+      goal.category = body.category;
+      goal.title = body.title;
+      goal.date = body.date;
+      goal.target = body.target;
+      goal.current = body.current;
       const updatedGoal = await goal.save();
       return updatedGoal;
     }
