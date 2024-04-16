@@ -6,6 +6,8 @@ export type ActivityDocument = Activity & Document;
 @Schema()
 export class Activity {
   @Prop({ required: true })
+  type: string;
+  @Prop({ required: true })
   category: string;
   @Prop({ required: true })
   content: string;
