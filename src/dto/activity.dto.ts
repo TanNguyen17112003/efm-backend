@@ -4,6 +4,12 @@ import { ApiProperty } from '@nestjs/swagger';
 export class CreateActivityDto {
     @IsString()
     @ApiProperty({
+        example: 'Income',
+        description: 'Example of activity type',
+    })
+    readonly type: string;
+    @IsString()
+    @ApiProperty({
         example: 'Shopping',
         description: 'Example of activity category',
     })
@@ -19,7 +25,7 @@ export class CreateActivityDto {
     @IsDate()
     @ApiProperty({
         example: '2021-09-30T00:00:00.000Z',
-        description: 'Date of goal'
+        description: 'Date of Activity'
     })
     readonly createdAt: Date;
 
