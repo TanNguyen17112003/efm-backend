@@ -37,8 +37,12 @@ import { ChallengeController } from 'src/controllers/challenge.controller';
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     MongooseModule.forFeature([{ name: Sample.name, schema: SampleSchema }]),
     MongooseModule.forFeature([{ name: Goal.name, schema: GoalSchema }]),
-    MongooseModule.forFeature([{ name: Activity.name, schema: ActivitySchema }]),
-    MongooseModule.forFeature([{ name: Challenge.name, schema: ChallengeSchema }]),
+    MongooseModule.forFeature([
+      { name: Activity.name, schema: ActivitySchema },
+    ]),
+    MongooseModule.forFeature([
+      { name: Challenge.name, schema: ChallengeSchema },
+    ]),
   ],
   controllers: [
     AppController,
@@ -47,7 +51,7 @@ import { ChallengeController } from 'src/controllers/challenge.controller';
     GoogleController,
     GoalController,
     ActivityController,
-    ChallengeController
+    ChallengeController,
   ],
   providers: [
     AppService,

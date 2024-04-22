@@ -26,21 +26,21 @@ export class CreateChallengeDto {
   @IsDate()
   @ApiProperty({
     example: '2021-09-30T00:00:00.000Z',
-    description: 'Date of challenge'
+    description: 'Date of challenge',
   })
   readonly date: Date;
 
   @IsNumber()
   @ApiProperty({
     example: '20000000',
-    description: 'Target amount of challenge'
+    description: 'Target amount of challenge',
   })
   readonly target: number;
 
   @IsNumber()
   @ApiProperty({
     example: '2000000',
-    description: 'Saved money of challenge'
+    description: 'Saved money of challenge',
   })
   readonly current: number;
 }
