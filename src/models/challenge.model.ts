@@ -16,6 +16,8 @@ export class Challenge {
   target: number;
   @Prop({ required: true })
   current: number;
+  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }] })
+  attendants: User[];
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
   createdBy: User;
 }

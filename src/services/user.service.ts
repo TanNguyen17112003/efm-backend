@@ -55,10 +55,10 @@ export class UserService {
       const comparison = await bcrypt.compare(user.password, password);
       if (comparison) {
         const payload = { email: user.email };
-        const {name} = foundUser
+        const { name } = foundUser;
         return {
           token: jwt.sign(payload),
-          name: name
+          name: name,
         };
       }
       return new HttpException(
@@ -74,5 +74,39 @@ export class UserService {
   async getByEmail(email: string): Promise<User> {
     const foundUser = await this.userModel.findOne({ email: email }).exec();
     return foundUser;
+  }
+
+  async findAll(): Promise<{ id: string; name: string }[]> {
+    const users = await this.userModel.find().select('_id name');
+    return users.map((user) => ({ id: user._id.toString(), name: user.name }));
+  }
+
+  async addFriend(user: User, friendId: string): Promise<void> {
+    const currentUser = await this.userModel.findById(user._id);
+    const friend = await this.userModel.findById(friendId);
+    if (!currentUser || !friend) {
+      throw new Error('User or friend not found');
+    }
+    if (
+      currentUser.friends.includes(friend) ||
+      friend.friends.includes(currentUser)
+    ) {
+      throw new Error('Users are already friends');
+    }
+    currentUser.friends.push(friend);
+    friend.friends.push(currentUser);
+    await currentUser.save();
+    await friend.save();
+  }
+
+  async getListOfFriends(user: User): Promise<UserDocument[]> {
+    const currentUser = await this.userModel.findById(user._id);
+    const friends = await this.userModel.find(
+      {
+        _id: { $in: currentUser.friends },
+      },
+      { _id: 1, name: 1 },
+    );
+    return friends;
   }
 }
