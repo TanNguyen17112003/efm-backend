@@ -64,11 +64,11 @@ import {
           'User is not authorized to update this goal',
         );
       }
-      goal.category = body.category;
-      goal.title = body.title;
-      goal.date = body.date;
-      goal.target = body.target;
-      goal.current = body.current;
+      if (body.category) goal.category = body.category;
+      if (body.title) goal.title = body.title;
+      if (body.date) goal.date = body.date;
+      if (body.target) goal.target = body.target;
+      if (body.current) goal.current = body.current;
       const updatedGoal = await goal.save();
       return updatedGoal;
     }
