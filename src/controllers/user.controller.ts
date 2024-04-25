@@ -8,6 +8,7 @@ import {
   UseGuards,
   Request,
   Param,
+  Put,
 } from '@nestjs/common';
 import { UserService } from '../services/user.service';
 import { JwtService } from '@nestjs/jwt';
@@ -33,17 +34,32 @@ export class UserController {
   @ApiResponse({ status: 200, description: 'OK.' })
   @Post('/signup')
   async Signup(@Response() response, @Body() user: SignUpDto) {
-    const userInfo = await this.userService.signup(user, this.jwtService);
-    return response.status(HttpStatus.CREATED).json({
-      userInfo,
-    });
+    try {
+      const userInfo = await this.userService.signup(user, this.jwtService);
+      return response.status(HttpStatus.CREATED).json({
+        userInfo,
+      });
+    } catch (error) {
+      return response.status(HttpStatus.BAD_REQUEST).json({
+        status: 'error',
+        message: error.message,
+      });
+    }
   }
+
   @Post('/signin')
   @ApiOperation({ summary: 'Sign in' })
   @ApiResponse({ status: 200, description: 'OK.' })
   async SignIn(@Response() response, @Body() user: SignInDto) {
-    const token = await this.userService.signin(user, this.jwtService);
-    return response.status(HttpStatus.OK).json(token);
+    try {
+      const token = await this.userService.signin(user, this.jwtService);
+      return response.status(HttpStatus.OK).json(token);
+    } catch (error) {
+      return response.status(HttpStatus.UNAUTHORIZED).json({
+        status: 'error',
+        message: 'Incorrect username or password',
+      });
+    }
   }
 
   @UseGuards(AuthGuard)
@@ -61,13 +77,20 @@ export class UserController {
   @ApiResponse({ status: 200, description: 'OK.' })
   @ApiBearerAuth('JWT-auth')
   async getAllUsers(@Response() response) {
-    const users = await this.userService.findAll();
-    return response.status(HttpStatus.OK).json(users);
+    try {
+      const users = await this.userService.findAll();
+      return response.status(HttpStatus.OK).json(users);
+    } catch (error) {
+      return response.status(HttpStatus.BAD_REQUEST).json({
+        status: 'error',
+        message: error.message,
+      });
+    }
   }
 
   @UseGuards(AuthGuard)
-  @Post('/add-friend/:friendId')
-  @ApiOperation({ summary: 'Add a friend' })
+  @Post('/request/:friendId')
+  @ApiOperation({ summary: 'Send a friend request' })
   @ApiResponse({ status: 200, description: 'OK.' })
   @ApiBearerAuth('JWT-auth')
   async addFriend(
@@ -75,10 +98,57 @@ export class UserController {
     @Request() request,
     @Param('friendId') friendId: string,
   ) {
-    await this.userService.addFriend(request.user, friendId);
-    return response
-      .status(HttpStatus.OK)
-      .json({ message: 'Friend added successfully' });
+    try {
+      await this.userService.addFriend(request.user, friendId);
+      return response
+        .status(HttpStatus.OK)
+        .json({ message: 'Send request successfully' });
+    } catch (error) {
+      return response.status(HttpStatus.BAD_REQUEST).json({
+        status: 'error',
+        message: error.message,
+      });
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Put('/request/:requestId')
+  @ApiOperation({ summary: 'Accept a friend request' })
+  @ApiResponse({ status: 200, description: 'OK.' })
+  @ApiBearerAuth('JWT-auth')
+  async acceptRequest(
+    @Response() response,
+    @Request() request,
+    @Param('requestId') requestId: string,
+  ) {
+    try {
+      await this.userService.acceptRequest(request.user, requestId);
+      return response
+        .status(HttpStatus.OK)
+        .json({ message: 'Friend request accepted successfully' });
+    } catch (error) {
+      return response.status(HttpStatus.BAD_REQUEST).json({
+        status: 'error',
+        message: error.message,
+      });
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('/request')
+  @ApiOperation({ summary: 'Get all friend requests' })
+  @ApiResponse({ status: 200, description: 'OK.' })
+  @ApiBearerAuth('JWT-auth')
+  async getRequest(@Response() response, @Request() request) {
+    try {
+      const requests = await this.userService.getRequests(request.user);
+      return response.status(HttpStatus.OK).json(requests);
+    } catch (error) {
+      return response.status(HttpStatus.BAD_REQUEST).json({
+        status: 'error',
+        message: error.message,
+      });
+    }
   }
 
   @UseGuards(AuthGuard)
@@ -87,7 +157,14 @@ export class UserController {
   @ApiResponse({ status: 200, description: 'OK.' })
   @ApiBearerAuth('JWT-auth')
   async getListOfFriends(@Response() response, @Request() request) {
-    const friends = await this.userService.getListOfFriends(request.user);
-    return response.status(HttpStatus.OK).json(friends);
+    try {
+      const friends = await this.userService.getListOfFriends(request.user);
+      return response.status(HttpStatus.OK).json(friends);
+    } catch (error) {
+      return response.status(HttpStatus.BAD_REQUEST).json({
+        status: 'error',
+        message: error.message,
+      });
+    }
   }
 }

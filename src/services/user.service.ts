@@ -6,10 +6,16 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { SignInDto } from 'src/dto/user.dto';
 import { SignUpDto } from 'src/dto/user.dto';
+import {
+  FriendRequest,
+  FriendRequestDocument,
+} from 'src/models/friendRequest.model';
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
+    @InjectModel(FriendRequest.name)
+    private readonly friendRequestModel: Model<FriendRequestDocument>,
   ) {}
   async signup(
     user: SignUpDto,
@@ -93,10 +99,58 @@ export class UserService {
     ) {
       throw new Error('Users are already friends');
     }
+
+    const existingRequest = await this.friendRequestModel.findOne({
+      from: currentUser._id,
+      to: friend._id,
+      accepted: false,
+    });
+
+    if (existingRequest) {
+      throw new Error('Request has already been sent to this user');
+    }
+
+    await this.friendRequestModel.create({
+      from: currentUser,
+      to: friend,
+      accepted: false,
+    });
+  }
+
+  async acceptRequest(user: User, requestId: string): Promise<void> {
+    const currentUser = await this.userModel.findById(user._id);
+    const request = await this.friendRequestModel.findById(requestId);
+    if (!currentUser || !request) {
+      throw new Error('User or request not found');
+    }
+
+    if (request.to.toString() !== currentUser._id.toString()) {
+      throw new Error('You do not have permission to accept this request');
+    }
+
+    await this.friendRequestModel.findByIdAndUpdate(requestId, {
+      accepted: true,
+    });
+
+    const friend = await this.userModel.findOne(request.from);
     currentUser.friends.push(friend);
     friend.friends.push(currentUser);
     await currentUser.save();
     await friend.save();
+  }
+
+  async getRequests(user: User): Promise<FriendRequest[]> {
+    const currentUser = await this.userModel.findById(user._id);
+    if (!currentUser) {
+      throw new Error('Current user not found');
+    }
+    const requests = await this.friendRequestModel
+      .find({
+        to: currentUser._id,
+        accepted: false,
+      })
+      .populate('from', 'name');
+    return requests;
   }
 
   async getListOfFriends(user: User): Promise<UserDocument[]> {

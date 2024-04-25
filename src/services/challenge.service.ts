@@ -10,6 +10,10 @@ import { Model, Types } from 'mongoose';
 import { Challenge, ChallengeDocument } from '../models/challenge.model';
 import { User, UserDocument } from 'src/models/user.model';
 import { CreateChallengeDto } from 'src/dto/challenge.dto';
+import {
+  Contribution,
+  ContributionDocument,
+} from 'src/models/contribution.model';
 @Injectable()
 export class ChallengeService {
   constructor(
@@ -17,6 +21,8 @@ export class ChallengeService {
     private challengeModel: Model<ChallengeDocument>,
     @InjectModel(User.name)
     private userModel: Model<UserDocument>,
+    @InjectModel(Contribution.name)
+    private contributionModel: Model<ContributionDocument>,
   ) {}
 
   async create(
@@ -117,6 +123,64 @@ export class ChallengeService {
 
     challenge.attendants.push(user);
     await challenge.save();
+  }
+
+  async contributeChallenge(
+    user: User,
+    challengeId: string,
+    amount: number,
+  ): Promise<void> {
+    const challenge = await this.challengeModel.findById(challengeId);
+    const currentUser = await this.userModel.findById(user._id);
+    if (!challenge) {
+      throw new Error('Challenge not found');
+    }
+    if (challenge.attendants.includes(user)) {
+      throw new Error('User does not participate in this challenge');
+    }
+
+    const contribution = await this.contributionModel.findOne({
+      createdBy: currentUser._id,
+      challenge: challenge._id,
+    });
+
+    if (!contribution) {
+      await this.contributionModel.create({
+        createdBy: currentUser,
+        challenge: challenge,
+        amount: amount,
+      });
+      await this.challengeModel.findByIdAndUpdate(challengeId, {
+        current: challenge.current + amount,
+      });
+    } else {
+      await this.contributionModel.findByIdAndUpdate(contribution._id, {
+        amount: contribution.amount + amount,
+      });
+      await this.challengeModel.findByIdAndUpdate(challengeId, {
+        current: challenge.current + amount,
+      });
+    }
+  }
+
+  async getContribution(
+    user: User,
+    challengeId: string,
+  ): Promise<Contribution> {
+    const challenge = await this.challengeModel.findById(challengeId);
+    const currentUser = await this.userModel.findById(user._id);
+    if (!challenge) {
+      throw new Error('Challenge not found');
+    }
+    if (challenge.attendants.includes(user)) {
+      throw new Error('User does not participate in this challenge');
+    }
+
+    const contribution = await this.contributionModel.findOne({
+      createdBy: currentUser._id,
+      challenge: challenge._id,
+    });
+    return contribution;
   }
 
   async getAttendedChallenges(user: User): Promise<Challenge[]> {

@@ -22,6 +22,14 @@ import { ActivityController } from 'src/controllers/activity.controller';
 import { Challenge, ChallengeSchema } from 'src/models/challenge.model';
 import { ChallengeService } from 'src/services/challenge.service';
 import { ChallengeController } from 'src/controllers/challenge.controller';
+import {
+  FriendRequest,
+  FriendRequestSchema,
+} from 'src/models/friendRequest.model';
+import {
+  Contribution,
+  ContributionSchema,
+} from 'src/models/contribution.model';
 
 @Module({
   imports: [
@@ -34,6 +42,12 @@ import { ChallengeController } from 'src/controllers/challenge.controller';
       secret: process.env.SECRET,
       signOptions: { expiresIn: '10h' },
     }),
+    MongooseModule.forFeature([
+      { name: FriendRequest.name, schema: FriendRequestSchema },
+    ]),
+    MongooseModule.forFeature([
+      { name: Contribution.name, schema: ContributionSchema },
+    ]),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     MongooseModule.forFeature([{ name: Sample.name, schema: SampleSchema }]),
     MongooseModule.forFeature([{ name: Goal.name, schema: GoalSchema }]),

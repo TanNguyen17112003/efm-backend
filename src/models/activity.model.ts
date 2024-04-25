@@ -13,7 +13,7 @@ export class Activity {
   content: string;
   @Prop({ required: true })
   createdAt: Date;
-  @Prop({required: true})
+  @Prop({ required: true })
   amount: number;
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
   createdBy: User;
