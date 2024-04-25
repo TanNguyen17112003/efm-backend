@@ -20,7 +20,10 @@ import {
 } from '@nestjs/swagger';
 import { ChallengeService } from '../services/challenge.service';
 import { AuthGuard } from 'src/guards/auth.guard';
-import { CreateChallengeDto } from 'src/dto/challenge.dto';
+import {
+  ContributeChallengeDto,
+  CreateChallengeDto,
+} from 'src/dto/challenge.dto';
 @ApiBearerAuth('JWT-auth')
 @ApiTags('Challenge')
 @Controller('/api/challenge')
@@ -150,6 +153,54 @@ export class ChallengeController {
     return response
       .status(HttpStatus.CREATED)
       .json({ message: 'Attended challenge successfully' });
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('/:id/contribute')
+  @ApiOperation({ summary: 'Contribute money to a challenge' })
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'ID of the challenge to attend',
+    schema: { oneOf: [{ type: 'string' }, { type: 'integer' }] },
+  })
+  @ApiResponse({ status: 201, description: 'OK.' })
+  async contributeChallenge(
+    @Response() response,
+    @Request() request,
+    @Param('id') id: string,
+    @Body() body: ContributeChallengeDto,
+  ) {
+    await this.challengeService.contributeChallenge(
+      request.user,
+      id,
+      body.amount,
+    );
+    return response
+      .status(HttpStatus.OK)
+      .json({ message: 'Contribute to challenge successfully' });
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('/:id/contribute')
+  @ApiOperation({ summary: 'Get total contribution money to a challenge' })
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'ID of the challenge to attend',
+    schema: { oneOf: [{ type: 'string' }, { type: 'integer' }] },
+  })
+  @ApiResponse({ status: 201, description: 'OK.' })
+  async getYourContribution(
+    @Response() response,
+    @Request() request,
+    @Param('id') id: string,
+  ) {
+    const contributions = await this.challengeService.getContribution(
+      request.user,
+      id,
+    );
+    return response.status(HttpStatus.OK).json(contributions);
   }
 
   @UseGuards(AuthGuard)

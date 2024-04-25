@@ -44,3 +44,12 @@ export class CreateChallengeDto {
   })
   readonly current: number;
 }
+
+export class ContributeChallengeDto {
+  @IsNumber()
+  @ApiProperty({
+    example: 100,
+    description: 'Amount of money to contribute',
+  })
+  readonly amount: number;
+}
