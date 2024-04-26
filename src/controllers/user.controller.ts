@@ -135,6 +135,29 @@ export class UserController {
   }
 
   @UseGuards(AuthGuard)
+  @Put('/request/:requestId/reject')
+  @ApiOperation({ summary: 'Reject a friend request' })
+  @ApiResponse({ status: 200, description: 'OK.' })
+  @ApiBearerAuth('JWT-auth')
+  async reject(
+    @Response() response,
+    @Request() request,
+    @Param('requestId') requestId: string,
+  ) {
+    try {
+      await this.userService.rejectRequest(request.user, requestId);
+      return response
+        .status(HttpStatus.OK)
+        .json({ message: 'Friend request rejected successfully' });
+    } catch (error) {
+      return response.status(HttpStatus.BAD_REQUEST).json({
+        status: 'error',
+        message: error.message,
+      });
+    }
+  }
+
+  @UseGuards(AuthGuard)
   @Get('/request')
   @ApiOperation({ summary: 'Get all friend requests' })
   @ApiResponse({ status: 200, description: 'OK.' })
@@ -142,6 +165,23 @@ export class UserController {
   async getRequest(@Response() response, @Request() request) {
     try {
       const requests = await this.userService.getRequests(request.user);
+      return response.status(HttpStatus.OK).json(requests);
+    } catch (error) {
+      return response.status(HttpStatus.BAD_REQUEST).json({
+        status: 'error',
+        message: error.message,
+      });
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('/my-request')
+  @ApiOperation({ summary: 'Get all friend requests' })
+  @ApiResponse({ status: 200, description: 'OK.' })
+  @ApiBearerAuth('JWT-auth')
+  async getMyRequest(@Response() response, @Request() request) {
+    try {
+      const requests = await this.userService.getMyRequests(request.user);
       return response.status(HttpStatus.OK).json(requests);
     } catch (error) {
       return response.status(HttpStatus.BAD_REQUEST).json({

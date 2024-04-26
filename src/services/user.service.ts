@@ -139,6 +139,20 @@ export class UserService {
     await friend.save();
   }
 
+  async rejectRequest(user: User, requestId: string): Promise<void> {
+    const currentUser = await this.userModel.findById(user._id);
+    const request = await this.friendRequestModel.findById(requestId);
+    if (!currentUser || !request) {
+      throw new Error('User or request not found');
+    }
+
+    if (request.to.toString() !== currentUser._id.toString()) {
+      throw new Error('You do not have permission to reject this request');
+    }
+
+    await this.friendRequestModel.findByIdAndDelete(requestId);
+  }
+
   async getRequests(user: User): Promise<FriendRequest[]> {
     const currentUser = await this.userModel.findById(user._id);
     if (!currentUser) {
@@ -147,6 +161,20 @@ export class UserService {
     const requests = await this.friendRequestModel
       .find({
         to: currentUser._id,
+        accepted: false,
+      })
+      .populate('from', 'name');
+    return requests;
+  }
+
+  async getMyRequests(user: User): Promise<FriendRequest[]> {
+    const currentUser = await this.userModel.findById(user._id);
+    if (!currentUser) {
+      throw new Error('Current user not found');
+    }
+    const requests = await this.friendRequestModel
+      .find({
+        from: currentUser._id,
         accepted: false,
       })
       .populate('from', 'name');
