@@ -19,7 +19,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { SignInDto } from 'src/dto/user.dto';
+import { SignInDto, UpdateNameDto, UpdatePasswordDto } from 'src/dto/user.dto';
 import { SignUpDto } from 'src/dto/user.dto';
 
 @ApiTags('Authentication')
@@ -58,6 +58,58 @@ export class UserController {
       return response.status(HttpStatus.UNAUTHORIZED).json({
         status: 'error',
         message: 'Incorrect username or password',
+      });
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Put('/update-name')
+  @ApiOperation({ summary: 'Update Username' })
+  @ApiResponse({ status: 200, description: 'OK.' })
+  @ApiBearerAuth('JWT-auth')
+  async updateName(
+    @Response() response,
+    @Request() request,
+    @Body() updateNameDto: UpdateNameDto,
+  ) {
+    try {
+      const updatedUser = await this.userService.updateName(
+        request.user,
+        updateNameDto,
+      );
+
+      return response.status(HttpStatus.OK).json({
+        message: 'Username updated successfully',
+        user: updatedUser,
+      });
+    } catch (error) {
+      return response.status(HttpStatus.BAD_REQUEST).json({
+        status: 'error',
+        message: error.message,
+      });
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Put('/update-password')
+  @ApiOperation({ summary: 'Update User Password' })
+  @ApiResponse({ status: 200, description: 'OK.' })
+  @ApiBearerAuth('JWT-auth')
+  async updatePassword(
+    @Response() response,
+    @Request() request,
+    @Body() updatePasswordDto: UpdatePasswordDto,
+  ) {
+    try {
+      await this.userService.updatePassword(request.user, updatePasswordDto);
+
+      return response.status(HttpStatus.OK).json({
+        message: 'Password updated successfully',
+      });
+    } catch (error) {
+      return response.status(HttpStatus.BAD_REQUEST).json({
+        status: 'error',
+        message: error.message,
       });
     }
   }
