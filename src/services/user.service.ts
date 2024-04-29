@@ -4,7 +4,7 @@ import { Model } from 'mongoose';
 import { User, UserDocument } from '../models/user.model';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { SignInDto } from 'src/dto/user.dto';
+import { SignInDto, UpdateNameDto, UpdatePasswordDto } from 'src/dto/user.dto';
 import { SignUpDto } from 'src/dto/user.dto';
 import {
   FriendRequest,
@@ -77,6 +77,46 @@ export class UserService {
       HttpStatus.UNAUTHORIZED,
     );
   }
+
+  async updateName(user: User, updateNameDto: UpdateNameDto): Promise<User> {
+    const currentUser = await this.userModel.findById(user._id);
+
+    if (!currentUser) {
+      throw new Error('User or request not found');
+    }
+
+    currentUser.name = updateNameDto.name;
+    await currentUser.save();
+
+    return currentUser;
+  }
+
+  async updatePassword(
+    user: User,
+    updatePasswordDto: UpdatePasswordDto,
+  ): Promise<void | HttpException> {
+    const currentUser = await this.userModel.findById(user._id);
+
+    if (!currentUser) {
+      throw new Error('User or request not found');
+    }
+
+    const { password } = currentUser;
+    const comparison = await bcrypt.compare(
+      updatePasswordDto.currentPassword,
+      password,
+    );
+
+    if (comparison) {
+      const salt = await bcrypt.genSalt();
+      const hash = await bcrypt.hash(updatePasswordDto.newPassword, salt);
+      currentUser.password = hash;
+      await currentUser.save();
+    } else {
+      throw new Error('Incorrect current password');
+    }
+  }
+
   async getByEmail(email: string): Promise<User> {
     const foundUser = await this.userModel.findOne({ email: email }).exec();
     return foundUser;
