@@ -55,9 +55,6 @@ export class ChallengeService {
     const challenges = await this.challengeModel
       .find({ createdBy: user._id })
       .exec();
-    if (!challenges || challenges.length === 0) {
-      throw new NotFoundException('No samples found');
-    }
     return challenges;
   }
 
