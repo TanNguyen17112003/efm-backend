@@ -38,17 +38,45 @@ export class ChallengeService {
     return savedChallenge;
   }
 
-  async getById(user: User, @Param() params): Promise<Challenge> {
+  async getById(user: User, @Param() params): Promise<any> {
     const challenge = await this.challengeModel.findById(params.id).exec();
     if (!challenge) {
       throw new NotFoundException('Challenge not found');
     }
-    if (challenge.createdBy.toString() !== user._id.toString()) {
+    if (
+      challenge.createdBy.toString() !== user._id.toString() &&
+      !challenge.attendants.some((attendantId: any) =>
+        attendantId.equals(user._id),
+      )
+    ) {
       throw new UnauthorizedException(
         'User is not authorized to access this challenge',
       );
     }
-    return challenge;
+    const attendantsInfo = await Promise.all(
+      challenge.attendants.map(async (attendantId) => {
+        const attendant = await this.userModel.findById(attendantId).exec();
+        const contribution = await this.getContribution(attendant, params.id);
+        return {
+          name: attendant.name,
+          contribution: contribution ? contribution.amount : 0,
+        };
+      }),
+    );
+
+    const challengeInfo = {
+      _id: challenge._id,
+      category: challenge.category,
+      name: challenge.name,
+      description: challenge.description,
+      date: challenge.date,
+      target: challenge.target,
+      current: challenge.current,
+      createdBy: challenge.createdBy,
+      attendants: attendantsInfo,
+    };
+
+    return challengeInfo;
   }
 
   async getAll(user: User): Promise<Challenge[]> {
