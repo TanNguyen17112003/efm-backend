@@ -23,6 +23,7 @@ import { AuthGuard } from 'src/guards/auth.guard';
 import {
   ContributeChallengeDto,
   CreateChallengeDto,
+  SendRequestToFriendDto,
 } from 'src/dto/challenge.dto';
 @ApiBearerAuth('JWT-auth')
 @ApiTags('Challenge')
@@ -211,5 +212,27 @@ export class ChallengeController {
     const user = request.user;
     const challenges = await this.challengeService.getAttendedChallenges(user);
     return response.status(HttpStatus.OK).json(challenges);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('/:id/request')
+  @ApiOperation({ summary: 'Send a challenge to friend' })
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'ID of the challenge to attend',
+    schema: { oneOf: [{ type: 'string' }, { type: 'integer' }] },
+  })
+  @ApiResponse({ status: 201, description: 'OK.' })
+  async sendRequest(
+    @Response() response,
+    @Request() request,
+    @Param('id') id: string,
+    @Body() body: SendRequestToFriendDto,
+  ) {
+    await this.challengeService.sendRequest(request.user, id, body.id);
+    return response
+      .status(HttpStatus.CREATED)
+      .json({ message: 'Send challenge to friend successfully' });
   }
 }

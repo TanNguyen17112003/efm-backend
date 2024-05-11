@@ -53,3 +53,12 @@ export class ContributeChallengeDto {
   })
   readonly amount: number;
 }
+
+export class SendRequestToFriendDto {
+  @IsNumber()
+  @ApiProperty({
+    example: '65f7393f2ec109eac4370c68',
+    description: 'Friend id',
+  })
+  readonly id: string;
+}

@@ -125,14 +125,17 @@ export class ChallengeService {
   }
 
   async getAllChallengesByFriends(user: User): Promise<Challenge[]> {
-    const currentUser = await this.userModel
-      .findById(user._id)
-      .populate('friends');
-    const friendIds = currentUser.friends.map(
-      (friend: User) => new Types.ObjectId(friend._id),
-    );
+    // const currentUser = await this.userModel
+    //   .findById(user._id)
+    //   .populate('friends');
+    // const friendIds = currentUser.friends.map(
+    //   (friend: User) => new Types.ObjectId(friend._id),
+    // );
+    // const challenges = await this.challengeModel.find({
+    //   createdBy: { $in: friendIds },
+    // });
     const challenges = await this.challengeModel.find({
-      createdBy: { $in: friendIds },
+      requests: { $in: [user._id] },
     });
     return challenges;
   }
@@ -214,5 +217,23 @@ export class ChallengeService {
     });
 
     return challenges;
+  }
+
+  async sendRequest(
+    user: User,
+    challengeId: string,
+    userId: string,
+  ): Promise<void> {
+    const challenge = await this.challengeModel.findById(challengeId);
+    const friend = await this.userModel.findById(userId);
+    if (!challenge) {
+      throw new Error('Challenge not found');
+    }
+    if (challenge.attendants.includes(user)) {
+      throw new Error('Friend is already participating in this challenge');
+    }
+
+    challenge.requests.push(friend);
+    await challenge.save();
   }
 }
