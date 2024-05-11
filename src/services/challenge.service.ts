@@ -57,6 +57,7 @@ export class ChallengeService {
       challenge.attendants.map(async (attendantId) => {
         const attendant = await this.userModel.findById(attendantId).exec();
         const contribution = await this.getContribution(attendant, params.id);
+        console.log(contribution);
         return {
           name: attendant.name,
           contribution: contribution ? contribution.amount : 0,
@@ -74,6 +75,7 @@ export class ChallengeService {
       current: challenge.current,
       createdBy: challenge.createdBy,
       attendants: attendantsInfo,
+      requests: challenge.requests,
     };
 
     return challengeInfo;
@@ -232,8 +234,13 @@ export class ChallengeService {
     if (challenge.attendants.includes(user)) {
       throw new Error('Friend is already participating in this challenge');
     }
+    let flag = true;
+    for (const i in challenge.requests) {
+      if (new Types.ObjectId(userId).equals(challenge.requests[i]._id))
+        flag = false;
+    }
+    if (flag) challenge.requests.push(friend);
 
-    challenge.requests.push(friend);
     await challenge.save();
   }
 }
