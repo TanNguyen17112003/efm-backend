@@ -18,6 +18,8 @@ export class Challenge {
   current: number;
   @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }] })
   attendants: User[];
+  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }] })
+  requests: User[];
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
   createdBy: User;
 }
